@@ -15,21 +15,20 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @Service
 public class StatClientImpl implements StatClient {
-    static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    RestClient restClient;
-    String statUrl;
+    static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final RestClient restClient;
 
     public StatClientImpl(@Value("${explore-with-me.stat-server.url}") String statUrl) {
         this.restClient = RestClient
                 .builder()
                 .baseUrl(statUrl)
                 .build();
-        this.statUrl = statUrl;
     }
 
     @Override
