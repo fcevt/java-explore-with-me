@@ -1,0 +1,78 @@
+package ru.practicum.exception;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.time.Instant;
+
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException e, HttpServletRequest request) {
+        String errorMessage = e.getConstraintViolations().stream()
+                .map(ConstraintViolation::getMessage)
+                .findFirst()
+                .orElse("Invalid input");
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(Instant.now())
+                .status(HttpStatus.BAD_REQUEST)
+                .error("Validation Failed")
+                .message(errorMessage)
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+
+    @ExceptionHandler(
+            MethodArgumentNotValidException.class            // @Valid annotation exceptions
+    )
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e,
+                                                                               HttpServletRequest request) {
+        String errorMessage = e.getBindingResult().getAllErrors().getFirst().getDefaultMessage();
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(Instant.now())
+                .status(HttpStatus.BAD_REQUEST)
+                .error("Validation Failed")
+                .message(errorMessage)
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({IllegalArgumentException.class, MethodArgumentTypeMismatchException.class,
+            HttpMessageNotReadableException.class, MissingServletRequestParameterException.class})
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(Throwable e, HttpServletRequest request) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(Instant.now())
+                .status(HttpStatus.BAD_REQUEST)
+                .error("Illegal Argument")
+                .message(e.getMessage())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException e, HttpServletRequest request) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(Instant.now())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .error("Internal Server Error")
+                .message(e.getMessage())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}
