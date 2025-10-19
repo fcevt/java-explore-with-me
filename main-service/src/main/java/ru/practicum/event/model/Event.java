@@ -25,28 +25,27 @@ public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     Long id;
 
     @ManyToOne
-    @JoinColumn(name = "initiator", nullable = false)
+    @JoinColumn(nullable = false)
     User initiator;
 
     @ManyToOne
     @JoinColumn(name = "categories_id", nullable = false)
     Category category;
 
-    @Column(name = "title", length = 120, nullable = false)
+    @Column(length = 120, nullable = false)
     String title;
 
-    @Column(name = "annotation", length = 2000, nullable = false)
+    @Column(length = 2000, nullable = false)
     String annotation;
 
-    @Column(name = "description", length = 7000, nullable = false)
+    @Column(length = 7000, nullable = false)
     String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "state", length = 20, nullable = false)
+    @Column(length = 20, nullable = false)
     State state;
 
     @Embedded
@@ -58,7 +57,7 @@ public class Event {
     @Column(name = "request_moderation", nullable = false)
     Boolean requestModeration;
 
-    @Column(name = "paid", nullable = false)
+    @Column(nullable = false)
     Boolean paid;
 
     @Column(name = "event_date", nullable = false)

@@ -20,7 +20,6 @@ public class Request {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
     @ManyToOne
@@ -32,7 +31,6 @@ public class Request {
     private Event event;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
     private ParticipationRequestStatus status;
 
     @Column(name = "created_at")

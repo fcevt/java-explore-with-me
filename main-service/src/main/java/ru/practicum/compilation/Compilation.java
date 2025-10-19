@@ -2,7 +2,6 @@ package ru.practicum.compilation;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.proxy.HibernateProxy;
@@ -23,15 +22,9 @@ public class Compilation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     Long id;
-
-    @Column(name = "pinned")
     Boolean pinned;
-
-    @Column(name = "title")
-    @Size(min = 1, max = 50)
-    @NotEmpty
+    @Column(length = 50, nullable = false)
     private String title;
 
     @ManyToMany

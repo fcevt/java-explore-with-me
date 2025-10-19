@@ -19,12 +19,8 @@ public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
-
-    @Column(name = "cat_name")
-    @Size(min = 1, max = 50)
-    @NotEmpty
+    @Column(name = "cat_name",length = 50, nullable = false)
     private String name;
 
     @Override
