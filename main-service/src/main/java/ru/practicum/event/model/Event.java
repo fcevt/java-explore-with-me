@@ -28,7 +28,7 @@ public class Event {
     Long id;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "initiator", nullable = false)
     User initiator;
 
     @ManyToOne
