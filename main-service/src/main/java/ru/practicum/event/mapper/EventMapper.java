@@ -1,5 +1,6 @@
 package ru.practicum.event.mapper;
 
+import lombok.experimental.UtilityClass;
 import ru.practicum.category.Category;
 import ru.practicum.category.CategoryMapper;
 import ru.practicum.event.dto.*;
@@ -9,6 +10,7 @@ import ru.practicum.user.UserMapper;
 
 import java.time.LocalDateTime;
 
+@UtilityClass
 public class EventMapper {
 
 
