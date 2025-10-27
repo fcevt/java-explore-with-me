@@ -59,4 +59,5 @@ CREATE TABLE IF NOT EXISTS comments (
     event_id           BIGINT NOT NULL REFERENCES events(id) ON DELETE CASCADE,
     created_time       TIMESTAMP NOT NULL,
     updated_time       TIMESTAMP
+);
 

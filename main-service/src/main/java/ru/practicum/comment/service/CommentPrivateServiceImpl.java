@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.comment.dto.CommentCreateDto;
 import ru.practicum.comment.dto.CommentDto;
 import ru.practicum.comment.mapper.CommentMapper;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Transactional
 public class CommentPrivateServiceImpl implements CommentPrivateService {
 
     CommentRepository commentRepository;

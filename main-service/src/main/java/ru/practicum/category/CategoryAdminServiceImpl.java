@@ -14,7 +14,7 @@ import ru.practicum.exception.NotFoundException;
 @RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@Transactional(readOnly = false)
+@Transactional
 public class CategoryAdminServiceImpl implements CategoryAdminService {
 
     CategoryRepository categoryRepository;

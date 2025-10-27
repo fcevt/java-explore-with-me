@@ -56,7 +56,7 @@ public class EventPrivateController {
             @PathVariable @Positive Long eventId
     ) {
         log.info("Calling to endpoint /users/{userId}/events/{eventId} GetMapping for userId: {} and eventId: {}",
-                userId, eventId, eventId);
+                userId, eventId);
         return eventPrivateService.getEventByUserIdAndEventId(userId, eventId);
     }
 

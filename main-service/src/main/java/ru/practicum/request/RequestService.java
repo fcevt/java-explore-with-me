@@ -32,7 +32,7 @@ public class RequestService {
     // ЗАЯВКИ ТЕКУЩЕГО ПОЛЬЗОВАТЕЛЯ
 
     // Добавление запроса от текущего пользователя на участие в событии
-    @Transactional(readOnly = false)
+    @Transactional
     public ParticipationRequestDto addRequest(Long userId, Long eventId) {
         User requester = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id=" + userId + " was not found"));
@@ -76,7 +76,7 @@ public class RequestService {
     }
 
     // Отмена своего запроса на участие в событии
-    @Transactional(readOnly = false)
+    @Transactional
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
         User requester = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id=" + userId + " was not found"));
@@ -117,7 +117,7 @@ public class RequestService {
     }
 
     // Изменение статуса (подтверждена, отменена) заявок на участие в событии текущего пользователя
-    @Transactional(readOnly = false)
+    @Transactional
     public EventRequestStatusUpdateResultDto moderateRequest(
             Long userId,
             Long eventId,

@@ -21,7 +21,7 @@ import java.util.List;
 public class CommentPublicController {
     CommentPublicService commentPublicService;
 
-    @GetMapping("/{eventId}")
+    @GetMapping("/event/{eventId}")
     List<CommentDto> getCommentsByEventId(@PathVariable Long eventId) {
         log.info("getCommentsByEventId {}", eventId);
         return commentPublicService.getCommentsByEventId(eventId);
