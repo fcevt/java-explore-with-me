@@ -12,6 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.EventHitDto;
 import ru.practicum.EventStatsResponseDto;
 import ru.practicum.StatClient;
+import ru.practicum.comment.dto.CommentDto;
+import ru.practicum.comment.mapper.CommentMapper;
+import ru.practicum.comment.repository.CommentRepository;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
@@ -37,6 +40,7 @@ public class EventPublicServiceImpl implements EventPublicService {
     StatClient statClient;
     EventRepository eventRepository;
     RequestRepository requestRepository;
+    CommentRepository commentRepository;
 
     // Получение событий с возможностью фильтрации
     @Override
@@ -82,7 +86,7 @@ public class EventPublicServiceImpl implements EventPublicService {
 
     // Получение подробной информации об опубликованном событии по его идентификатору
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public EventFullDto getEventById(Long eventId, HttpServletRequest request) {
         // событие должно быть опубликовано
         Event event = eventRepository.findByIdAndState(eventId, State.PUBLISHED)
@@ -92,6 +96,10 @@ public class EventPublicServiceImpl implements EventPublicService {
         Long confirmedRequests = requestRepository.countByEventIdAndStatus(eventId, ParticipationRequestStatus.CONFIRMED);
         Long views = getViews(eventId);
 
+        //получаем список комментов
+        List<CommentDto> commentDtoList = commentRepository.findAllByEvent_Id(eventId).stream()
+                .map(CommentMapper::toCommentDto)
+                .toList();
         // информацию о том, что по этому эндпоинту был осуществлен и обработан запрос, нужно сохранить в сервисе статистики
         statClient.hit(EventHitDto.builder()
                 .ip(request.getRemoteAddr())
@@ -100,7 +108,7 @@ public class EventPublicServiceImpl implements EventPublicService {
                 .timestamp(LocalDateTime.now())
                 .build());
 
-        return EventMapper.toEventFullDto(event, confirmedRequests, views);
+        return EventMapper.toEventFullDto(event, confirmedRequests, views, commentDtoList);
     }
 
     private Map<Long, Long> getViewsForListEvents(List<Long> eventIds) {

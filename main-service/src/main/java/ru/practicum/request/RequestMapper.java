@@ -1,9 +1,11 @@
 package ru.practicum.request;
 
+import lombok.experimental.UtilityClass;
 import ru.practicum.event.model.Event;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.user.User;
 
+@UtilityClass
 public class RequestMapper {
 
     public static ParticipationRequestDto toDto(Request request) {

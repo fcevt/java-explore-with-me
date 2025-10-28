@@ -11,6 +11,9 @@ import ru.practicum.EventStatsResponseDto;
 import ru.practicum.StatClient;
 import ru.practicum.category.Category;
 import ru.practicum.category.CategoryRepository;
+import ru.practicum.comment.dto.CommentDto;
+import ru.practicum.comment.mapper.CommentMapper;
+import ru.practicum.comment.repository.CommentRepository;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.mapper.LocationMapper;
@@ -23,10 +26,7 @@ import ru.practicum.request.ParticipationRequestStatus;
 import ru.practicum.request.RequestRepository;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +38,7 @@ public class EventAdminServiceImpl implements EventAdminService {
     EventRepository eventRepository;
     CategoryRepository categoryRepository;
     RequestRepository requestRepository;
+    CommentRepository commentRepository;
     StatClient statClient;
 
     // Поиск событий
@@ -57,15 +58,17 @@ public class EventAdminServiceImpl implements EventAdminService {
                         r -> (Long) r[1]
                 ));
         Map<Long,Long> viewsMap = getViewsForListEvents(eventIds);
+        Map<Long, List<CommentDto>> commentsMap = getCommentsForListEvents(events);
 
         return events.stream()
-                .map(e -> EventMapper.toEventFullDto(e, confirmedRequestsMap.get(e.getId()), viewsMap.get(e.getId())))
+                .map(e -> EventMapper.toEventFullDto(e, confirmedRequestsMap.get(e.getId()),
+                        viewsMap.get(e.getId()), commentsMap.getOrDefault(e.getId(), List.of())))
                 .toList();
     }
 
     // Редактирование данных события и его статуса (отклонение/публикация).
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public EventFullDto updateEventByAdmin(Long eventId, UpdateEventDto updateEventDto) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
@@ -110,7 +113,10 @@ public class EventAdminServiceImpl implements EventAdminService {
         eventRepository.save(event);
         Long confirmedRequests = requestRepository.countByEventIdAndStatus(eventId, ParticipationRequestStatus.CONFIRMED);
         Long views = getViews(eventId);
-        return EventMapper.toEventFullDto(event, confirmedRequests, views);
+        List<CommentDto> commentDtoList = commentRepository.findAllByEvent_Id(eventId).stream()
+                .map(CommentMapper::toCommentDto)
+                .toList();
+        return EventMapper.toEventFullDto(event, confirmedRequests, views, commentDtoList);
     }
 
     private Map<Long, Long> getViewsForListEvents(List<Long> eventIds) {
@@ -137,6 +143,21 @@ public class EventAdminServiceImpl implements EventAdminService {
             views = listStats.get(0).getHits();
         }
         return views;
+    }
+
+    private Map<Long, List<CommentDto>> getCommentsForListEvents(List<Event> events) {
+        Map<Long, List<CommentDto>> commentDtoMap = new HashMap<>();
+        List<CommentDto> commentList = commentRepository.findCommentsByEventIn(events).stream()
+                .map(CommentMapper::toCommentDto)
+                .toList();
+        for (CommentDto comment : commentList) {
+            if (!commentDtoMap.containsKey(comment.getEventId())) {
+                commentDtoMap.put(comment.getEventId(), List.of(comment));
+            } else {
+                commentDtoMap.get(comment.getEventId()).add(comment);
+            }
+        }
+        return commentDtoMap;
     }
 
 }

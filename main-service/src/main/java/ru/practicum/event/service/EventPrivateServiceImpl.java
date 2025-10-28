@@ -12,6 +12,9 @@ import ru.practicum.EventStatsResponseDto;
 import ru.practicum.StatClient;
 import ru.practicum.category.Category;
 import ru.practicum.category.CategoryRepository;
+import ru.practicum.comment.dto.CommentDto;
+import ru.practicum.comment.mapper.CommentMapper;
+import ru.practicum.comment.repository.CommentRepository;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.mapper.LocationMapper;
@@ -41,11 +44,12 @@ public class EventPrivateServiceImpl implements EventPrivateService {
     CategoryRepository categoryRepository;
     EventRepository eventRepository;
     RequestRepository requestRepository;
+    CommentRepository commentRepository;
     StatClient statClient;
 
     // Добавление нового события
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public EventFullDto addEvent(Long userId, NewEventDto newEventDto) {
         User initiator = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id=" + userId + " was not found"));
@@ -54,7 +58,7 @@ public class EventPrivateServiceImpl implements EventPrivateService {
 
         Event newEvent = EventMapper.toEvent(newEventDto, initiator, category);
         eventRepository.save(newEvent);
-        return EventMapper.toEventFullDto(newEvent, 0L, 0L);
+        return EventMapper.toEventFullDto(newEvent, 0L, 0L, List.of());
     }
 
     // Получение полной информации о событии добавленном текущим пользователем
@@ -71,7 +75,10 @@ public class EventPrivateServiceImpl implements EventPrivateService {
 
         Long confirmedRequests = requestRepository.countByEventIdAndStatus(event.getId(), ParticipationRequestStatus.CONFIRMED);
         Long views = getViews(eventId);
-        return EventMapper.toEventFullDto(event, confirmedRequests, views);
+        List<CommentDto> commentDtoList = commentRepository.findAllByEvent_Id(eventId).stream()
+                .map(CommentMapper::toCommentDto)
+                .toList();
+        return EventMapper.toEventFullDto(event, confirmedRequests, views, commentDtoList);
     }
 
     // Получение событий, добавленных текущим пользователем
@@ -103,7 +110,7 @@ public class EventPrivateServiceImpl implements EventPrivateService {
 
     // Изменение события добавленного текущим пользователем
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public EventFullDto updateEventByUserIdAndEventId(Long userId, Long eventId, UpdateEventDto updateEventDto) {
         User initiator = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id=" + userId + " was not found"));
@@ -152,7 +159,10 @@ public class EventPrivateServiceImpl implements EventPrivateService {
         eventRepository.save(event);
         Long confirmedRequests = requestRepository.countByEventIdAndStatus(event.getId(), ParticipationRequestStatus.CONFIRMED);
         Long views = getViews(eventId);
-        return EventMapper.toEventFullDto(event, confirmedRequests, views);
+        List<CommentDto> commentDtoList = commentRepository.findAllByEvent_Id(eventId).stream()
+                .map(CommentMapper::toCommentDto)
+                .toList();
+        return EventMapper.toEventFullDto(event, confirmedRequests, views, commentDtoList);
     }
 
     private Map<Long, Long> getViewsForListEvents(List<Long> eventIds) {

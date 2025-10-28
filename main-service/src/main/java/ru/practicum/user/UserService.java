@@ -19,7 +19,7 @@ public class UserService {
 
     // MODIFY OPS
 
-    @Transactional(readOnly = false)
+    @Transactional
     public UserDto create(NewUserRequestDto newUserRequestDto) {
         if (userRepository.existsByEmail(newUserRequestDto.getEmail())) {
             throw new ConflictException("User with email " + newUserRequestDto.getEmail() + " already exists",
@@ -30,7 +30,7 @@ public class UserService {
         return UserMapper.toDto(newUser);
     }
 
-    @Transactional(readOnly = false)
+    @Transactional
     public void delete(Long userId) {
         User userToDelete = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id=" + userId + " was not found"));
